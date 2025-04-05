@@ -1,93 +1,61 @@
+# Azure Blob Manager – Backend (ASP.NET Core)
 
-## 💡 Features (Server Side)
+## 🧠 Architecture
 
-- 🔐 Secure and modular ASP.NET Core API
-- 🧾 Swagger documentation out-of-the-box
-- 🔁 Upload / Download / Delete / List operations for blob containers
-- 🌐 Fully integrated CORS and HTTPS redirection
-- 🧰 Interface-based architecture with dependency injection
-- 📂 Supports any type of file: image, video, audio, documents
-
-## 📚 Overview
-
-This backend provides a solid and scalable API for managing files in Azure Blob Storage.
-It is built with **ASP.NET Core** using clean architecture practices and runs easily on Azure App Services.
-You can plug any frontend to this API and start uploading files immediately.
-Swagger is included for testing and documentation.
-
-
-# 🔧 Azure Blob Manager — Backend (ASP.NET Core)
-
-This is the **backend API** of the Azure Blob Manager — provides endpoints to upload, list, delete, and download files from Azure Blob Storage.
+- ASP.NET Core Web API
+- Azure Blob Storage SDK via `Azure.Storage.Blobs`
+- Repository pattern with interface abstraction
+- Swagger integration for API testing
+- CORS support for client requests
+- Environment-based configuration via `appsettings.json`
 
 ---
 
-## 🛠️ Features
+## 📌 API Endpoints
 
-- 🔐 CORS configured for SPA frontend
-- 📦 Azure Blob Storage Client via `BlobServiceClient`
-- 🔗 REST API endpoints for file operations
-- 🧾 Swagger UI available on root for easy testing
+| Method | Endpoint                       | Description                        |
+|--------|--------------------------------|------------------------------------|
+| GET    | /api/GetContainers             | Returns list of blob containers   |
+| GET    | /api/GetBlobFiles?container=X  | Returns blob file names           |
+| GET    | /api/DownloadBlobFile          | Downloads file by container+name  |
+
+All endpoints are defined in `BlobStorageController.cs`.
 
 ---
 
-## 🔌 API Endpoints
+## ⚙️ Deployment Instructions (Azure App Service)
+
+1. Configure **Azure App Service**
+2. Set connection string `AzureBlobConnection` in App Settings
+3. Deploy using:
+```bash
+dotnet publish -c Release
+az webapp deployment source config-zip --src ./publish.zip ...
+```
+4. Or use GitHub Actions workflow.
+
+---
+
+## 🔐 Environment Variables
+
+Set in Azure App Service → Configuration:
 
 ```
-GET    /api/BlobStorage/GetContainers
-GET    /api/BlobStorage/GetBlobFiles?containerName=
-POST   /api/BlobStorage/UploadBlobFile?containerName=
-DELETE /api/BlobStorage/DeleteBlobFile?containerName=&fileName=
-GET    /api/BlobStorage/DownloadBlobFile?containerName=&fileName=
-```
-
----
-
-## ⚠️ Deployment Tips (Real Life Lessons)
-
-### ❌ Bug: Frontend can’t fetch containers
-✅ FIX: Make sure CORS is enabled before middleware
-```csharp
-builder.Services.AddCors(...)
-app.UseCors("AllowAll")
-```
-
-### 🧪 Swagger not showing?
-✅ FIX: Add `app.UseSwagger()` and `app.UseSwaggerUI()` **outside of if (env.IsDevelopment)**
-
-### ⚠️ Connection string is null?
-✅ FIX:
-- Check `AzureBlobConnection` in `appsettings.json`
-- Or override in Azure via Application Settings
-
----
-
-## ⚙️ Hosting on Azure Web App
-
-- Deployed via GitHub Actions using OIDC + publish profile
-- Artifacts zipped and deployed directly with:
-```yaml
-uses: azure/webapps-deploy@v3
+AzureBlobConnection = DefaultEndpointsProtocol=...;AccountKey=...
 ```
 
 ---
 
-## 📂 Project Structure
+## 🔄 Client Integration
 
-```
-BlobStorageAPI/
-├── Controllers/
-│   └── BlobStorageController.cs
-├── Interfaces/
-├── Repositories/
-├── Program.cs
-├── appsettings.json
-```
+- Accepts cross-origin requests from Azure Static Web App.
+- Axios requests from frontend routed to this API with absolute URL.
 
 ---
 
-## 🧠 Final Thought
+## 🚀 Extensibility Ideas
 
-> **Deploying to Azure is simple — once you fight the battles**.  
-> CORS, dist paths, secrets, and broken GitHub Actions are just rites of passage 😤  
-> But once it's up — you’ve got a sleek full-stack cloud file manager at your command.
+- Add POST /api/UploadBlob
+- Add DELETE /api/DeleteBlob
+- Add authentication (JWT / OAuth)
+- Add logging and monitoring (e.g., AppInsights)
