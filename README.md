@@ -1,61 +1,56 @@
 # Azure Blob Manager – Backend (ASP.NET Core)
 
-## 🧠 Architecture
+![Preview](./preview-api.png)
 
+## 🧠 Architecture
 - ASP.NET Core Web API
 - Azure Blob Storage SDK via `Azure.Storage.Blobs`
 - Repository pattern with interface abstraction
 - Swagger integration for API testing
 - CORS support for client requests
 - Environment-based configuration via `appsettings.json`
+- Deployed to Azure App Service via GitHub Actions
 
 ---
 
-## 📌 API Endpoints
+## 🛠️ Endpoints
 
-| Method | Endpoint                       | Description                        |
-|--------|--------------------------------|------------------------------------|
-| GET    | /api/GetContainers             | Returns list of blob containers   |
-| GET    | /api/GetBlobFiles?container=X  | Returns blob file names           |
-| GET    | /api/DownloadBlobFile          | Downloads file by container+name  |
-
-All endpoints are defined in `BlobStorageController.cs`.
-
----
-
-## ⚙️ Deployment Instructions (Azure App Service)
-
-1. Configure **Azure App Service**
-2. Set connection string `AzureBlobConnection` in App Settings
-3. Deploy using:
-```bash
-dotnet publish -c Release
-az webapp deployment source config-zip --src ./publish.zip ...
-```
-4. Or use GitHub Actions workflow.
+| Method | Endpoint                              | Description                  |
+|--------|---------------------------------------|------------------------------|
+| GET    | /api/BlobStorage/GetContainers        | Get all containers           |
+| GET    | /api/BlobStorage/GetFiles?container=x | Get file list from container |
+| GET    | /api/BlobStorage/Download?filename=x&container=y | Download blob     |
+| DELETE | /api/BlobStorage/Delete?filename=x&container=y | Delete blob        |
+| POST   | /api/BlobStorage/Upload               | Upload file (multipart/form) |
 
 ---
 
-## 🔐 Environment Variables
-
-Set in Azure App Service → Configuration:
-
-```
-AzureBlobConnection = DefaultEndpointsProtocol=...;AccountKey=...
+## 🔒 Environment Variables (in `appsettings.json`)
+```json
+{
+  "ConnectionStrings": {
+    "AzureBlobConnection": "<YOUR_BLOB_CONNECTION_STRING>"
+  }
+}
 ```
 
 ---
 
-## 🔄 Client Integration
-
-- Accepts cross-origin requests from Azure Static Web App.
-- Axios requests from frontend routed to this API with absolute URL.
+## 🚀 Deployment Instructions
+- Configure `AZUREAPPSERVICE_...` secrets in GitHub
+- Push to `master` branch – GitHub Actions triggers deploy via `master_webappclient.yml`
 
 ---
 
-## 🚀 Extensibility Ideas
+## 🔧 Tech Stack
+- ASP.NET Core 7.0+
+- Azure Blob Storage SDK
+- Swagger / OpenAPI
+- GitHub Actions
 
-- Add POST /api/UploadBlob
-- Add DELETE /api/DeleteBlob
-- Add authentication (JWT / OAuth)
-- Add logging and monitoring (e.g., AppInsights)
+---
+
+## 🚀 Extensibility
+- Add authorization and roles
+- Audit logs or version control of blobs
+- File metadata tagging or indexing
